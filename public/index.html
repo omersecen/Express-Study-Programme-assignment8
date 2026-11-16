@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Development Programme</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Web Development Programme</h1>
+    <p>Programme information and API tester</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>About the programme</h2>
+      <p>This is a fictional study programme for students learning how websites work. Students start with HTML, CSS and JavaScript, then learn about servers, databases and networks.</p>
+      <p>The buttons below let you try the programme server and see what it sends back.</p>
+    </section>
+
+    <section>
+      <h2>Try the API</h2>
+      <p>Choose a request. The admin and missing-route buttons return errors on purpose.</p>
+      <div class="buttons">
+        <button type="button" data-path="/api/courses">Courses</button>
+        <button type="button" data-path="/api/status">Server status</button>
+        <button type="button" data-path="/api/headers">Request headers</button>
+        <button type="button" data-path="/api/subscribe" data-method="POST">Subscribe (POST)</button>
+        <button type="button" data-path="/api/admin">Admin (403)</button>
+        <button type="button" data-path="/api/stats">Request count</button>
+        <button type="button" data-path="/api/missing">Missing route (404)</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Response</h2>
+      <p id="request-line">No request yet.</p>
+      <p id="status" aria-live="polite">Status: —</p>
+      <pre id="response-body" aria-live="polite">Choose a button to see the response here.</pre>
+    </section>
+
+    <section>
+      <h2>Other routes</h2>
+      <nav aria-label="Other server routes">
+        <a href="/hello">Hello</a>
+        <a href="/robots.txt">robots.txt</a>
+        <a href="/old-page">Old page redirect</a>
+      </nav>
+    </section>
+  </main>
+
+  <footer>Omer Secen · Web Programming · Assignment 8</footer>
+</body>
+</html>

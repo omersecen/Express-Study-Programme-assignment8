@@ -11,7 +11,7 @@ npm ci
 npm start
 ```
 
-The default address is http://localhost:3000. Use `npm run dev` to restart the server when a file changes.
+The default address is http://localhost:3000. Open it in your browser to use the API buttons. Use `npm run dev` to restart the server when a file changes.
 
 To choose a different port:
 
@@ -23,6 +23,7 @@ PORT=4000 npm start
 
 | Method | Path | Response |
 | --- | --- | --- |
+| GET | `/` | The programme page from `public/index.html` |
 | GET | `/hello` | A plain-text greeting |
 | GET | `/robots.txt` | Plain-text crawler instructions |
 | GET | `/old-page` | 302 redirect to `/hello` |
@@ -41,7 +42,7 @@ The subscribe route is just a practice response. It does not save a subscription
 
 The logger prints the time, HTTP method and URL before the route runs. The counter runs next, so it has already counted the current request when `/api/stats` reads its value. Both functions call `next()` to let Express continue to the next handler.
 
-The middleware is placed before the routes, so successful requests, failed requests and redirects all count. Visiting `/api/stats` also adds one, and following a redirect causes another request. The counter is only kept in memory and resets when the server restarts, including a restart from `node --watch`.
+The middleware is placed before `express.static` and the routes, so page requests, CSS, JavaScript, successful API requests, failed requests and redirects all count. Visiting `/api/stats` also adds one, and following a redirect causes another request. The counter is only kept in memory and resets when the server restarts, including a restart from `node --watch`.
 
 ## Route order
 

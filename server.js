@@ -1,7 +1,9 @@
 import express from 'express';
+import { fileURLToPath } from 'node:url';
 
 const app = express();
 const port = process.env.PORT || 3000;
+const publicFolder = fileURLToPath(new URL('./public', import.meta.url));
 
 const courses = [
   { id: 1, title: 'Web Programming', credits: 5 },
@@ -23,6 +25,7 @@ function requestCounter(req, res, next) {
 
 app.use(requestLogger);
 app.use(requestCounter);
+app.use(express.static(publicFolder));
 
 app.get('/hello', (req, res) => {
   res.type('text/plain').send("Hello from Omer's server");
