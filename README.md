@@ -51,3 +51,148 @@ The 404 fallback is an `app.use` handler after all the real routes. It catches a
 ## Browser page
 
 The page calls the API with relative URLs using `fetch()`. The subscribe button uses POST, and the response area shows the HTTP status and formatted JSON, including the expected 403 and 404 errors. Buttons are disabled while a request is pending; a network failure shows a message and enables them again.
+
+## curl evidence
+
+These outputs were captured from the running server with `curl --include`. Each block includes the status line, headers and body.
+
+### Course list
+
+```sh
+curl --include http://localhost:3000/api/courses
+```
+
+```text
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 144
+ETag: W/"90-JLGlISx3ZQP0/aeRA384gjHqpgo"
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"id":1,"title":"Web Programming","credits":5},{"id":2,"title":"Database Basics","credits":4},{"id":3,"title":"Computer Networks","credits":4}]
+```
+
+### Subscribe
+
+```sh
+curl --include --request POST http://localhost:3000/api/subscribe
+```
+
+```text
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 19
+ETag: W/"13-oWAPIqDXuocNexKhPYW9ayyk98c"
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"subscribed":true}
+```
+
+### Admin
+
+```sh
+curl --include http://localhost:3000/api/admin
+```
+
+```text
+HTTP/1.1 403 Forbidden
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-TLNzmZqKxaTuFdX/dVWWPBu44/c"
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Forbidden"}
+```
+
+### Redirect
+
+```sh
+curl --include http://localhost:3000/old-page
+```
+
+```text
+HTTP/1.1 302 Found
+X-Powered-By: Express
+Location: /hello
+Vary: Accept
+Content-Type: text/plain; charset=utf-8
+Content-Length: 28
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+Found. Redirecting to /hello
+```
+
+### Missing API route
+
+```sh
+curl --include http://localhost:3000/api/missing
+```
+
+```text
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 21
+ETag: W/"15-bm7tJgu8FHlq5QU+Y6gDxOGPfRc"
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":"Not found"}
+```
+
+### Missing page
+
+```sh
+curl --include http://localhost:3000/missing-page
+```
+
+```text
+HTTP/1.1 404 Not Found
+X-Powered-By: Express
+Content-Type: text/plain; charset=utf-8
+Content-Length: 15
+ETag: W/"f-vPe81ES0SvanXIRqCOkvvFF53IE"
+Date: Mon, 16 Nov 2026 19:01:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+Page not found.
+```
+
+## Reasoning questions
+
+### 1. Route order experiment
+
+In a temporary copy of `server.js`, the 404 fallback was moved above the middleware and routes. `/`, `/hello` and `/api/courses` all returned 404 even though they exist. Express checks handlers in their registered order, so the fallback sent a response before the real handlers could run.
+
+### 2. Logger experiment
+
+Removing `next()` from the logger in a temporary copy left the already-open browser page showing `Status: waiting...` and `Loading...`. The server still printed the timestamp and `GET /api/status`. A separate `curl --include --max-time 3` request timed out with exit code 28 and no HTTP response. The logger did not send a response or pass control to the route, so the request stayed pending.
+
+### 3. Status codes
+
+201 means a resource was created, so it describes a new subscription more precisely than a general 200 success. This assignment only simulates that creation and saves nothing. A missing page needs 404 so clients can recognise the failure from the status instead of treating an error message as a successful 200 response (see MDN on [201](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201) and [404](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404)).
+
+### 4. Port configuration
+
+A hosting service might assign a port instead of allowing the app to choose 3000. Reading `process.env.PORT` lets the same code use that port without editing the file. The fallback keeps it easy to run locally when no port is supplied.
+
+### 5. Dependencies
+
+`node_modules` is a large generated folder, and the package files already describe how to install it again. After cloning, a teammate needs Node.js 26 LTS, then runs `npm ci` in the repository folder to install the locked dependencies and `npm start` to run the server. Committing `package-lock.json` keeps those dependency versions consistent.
+
+### 6. Same origin
+
+Opening `index.html` from disk gives it a `file:` origin, so a relative URL such as `/api/courses` points to a file URL rather than this Express server. Using an HTTP server URL from that file would be a cross-origin request, and reading its response is restricted by the browser's [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy) unless cross-origin access is allowed. Serving both the page and API from the same protocol, host and port avoids this problem.
