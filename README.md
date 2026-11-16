@@ -31,5 +31,12 @@ PORT=4000 npm start
 | GET | `/api/headers` | The request's User-Agent and Accept values |
 | POST | `/api/subscribe` | 201 and `{"subscribed":true}` |
 | GET | `/api/admin` | 403 and `{"error":"Forbidden"}` |
+| GET | `/api/stats` | The number of requests received since startup |
 
 The subscribe route is just a practice response. It does not save a subscription or read the request body.
+
+## Middleware and counting
+
+The logger prints the time, HTTP method and URL before the route runs. The counter runs next, so it has already counted the current request when `/api/stats` reads its value. Both functions call `next()` to let Express continue to the next handler.
+
+The middleware is placed before the routes, so successful requests, failed requests and redirects all count. Visiting `/api/stats` also adds one, and following a redirect causes another request. The counter is only kept in memory and resets when the server restarts, including a restart from `node --watch`.

@@ -9,6 +9,21 @@ const courses = [
   { id: 3, title: 'Computer Networks', credits: 4 }
 ];
 
+let requestsServed = 0;
+
+function requestLogger(req, res, next) {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+}
+
+function requestCounter(req, res, next) {
+  requestsServed += 1;
+  next();
+}
+
+app.use(requestLogger);
+app.use(requestCounter);
+
 app.get('/hello', (req, res) => {
   res.type('text/plain').send("Hello from Omer's server");
 });
@@ -46,6 +61,10 @@ app.post('/api/subscribe', (req, res) => {
 
 app.get('/api/admin', (req, res) => {
   res.status(403).json({ error: 'Forbidden' });
+});
+
+app.get('/api/stats', (req, res) => {
+  res.json({ requestsServed });
 });
 
 app.listen(port, () => {
