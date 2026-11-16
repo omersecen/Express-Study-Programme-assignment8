@@ -4,9 +4,11 @@ Web Programming, Assignment 8. A small Node.js and Express server for a fictiona
 
 ## Running the project
 
-Use Node.js 26 LTS.
+Use [Node.js 26 LTS](https://nodejs.org/en/download/).
 
 ```sh
+git clone https://github.com/omersecen/Express-Study-Programme-assignment8.git
+cd Express-Study-Programme-assignment8
 npm ci
 npm start
 ```
@@ -196,3 +198,40 @@ A hosting service might assign a port instead of allowing the app to choose 3000
 ### 6. Same origin
 
 Opening `index.html` from disk gives it a `file:` origin, so a relative URL such as `/api/courses` points to a file URL rather than this Express server. Using an HTTP server URL from that file would be a cross-origin request, and reading its response is restricted by the browser's [same-origin policy](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Same-origin_policy) unless cross-origin access is allowed. Serving both the page and API from the same protocol, host and port avoids this problem.
+
+## File organization
+
+```text
+assignment8/
+├── public/
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
+├── server.js
+├── package.json
+├── package-lock.json
+├── .gitignore
+└── README.md
+```
+
+`server.js` contains the hard-coded courses, middleware and routes. The `public` folder contains the page, its CSS and its browser JavaScript. Express is the only direct dependency.
+
+## Self-study notes
+
+- **Process information:** The [Node.js process documentation](https://nodejs.org/api/process.html) explains that `process.version` contains the Node version and `process.uptime()` gives the process's running time in seconds. The status route uses both and rounds uptime down with `Math.floor()` for whole seconds.
+- **Plain-text responses:** The [Express response documentation](https://expressjs.com/en/5x/api/response/#res.type) shows how `res.type()` sets the content type. The greeting and robots routes use `res.type('text/plain')` before `res.send()` so the browser receives plain text.
+- **Readable JSON:** The [JSON.stringify documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) describes its indentation argument. `JSON.stringify(data, null, 2)` formats the response with two spaces, and assigning that string to a `<pre>` element's `textContent` displays it as text.
+- **Static file paths:** The [Express static-files guide](https://expressjs.com/en/starter/static-files/) explains that a relative static folder depends on the working directory. The server builds its folder URL relative to `import.meta.url`, then uses [Node's fileURLToPath](https://nodejs.org/api/url.html#urlfileurltopathurl-options) to turn it into an absolute file path for `express.static`. This also handles spaces in folder names correctly.
+
+## Challenges
+
+The main tricky part was separating the folder containing `server.js` from the folder the terminal starts in. Another detail was counting static-file requests as well as API calls, which is why both middleware functions are above `express.static`. The experiments also showed how one misplaced handler or missing `next()` can stop otherwise correct routes from working.
+
+## Other checks
+
+- All seven API buttons were tried in the browser, including the expected 403 and 404 responses.
+- Stopping a test server showed the network-error message and enabled the buttons again.
+- At a 375px viewport width, the page had no horizontal overflow.
+- A separate server on port 3103 was started from another folder; its page, CSS, JavaScript and API still worked.
+- A fresh `npm ci` installation was tested with Node.js v26.13.1 in a folder containing spaces.
+- An isolated counter test confirmed that the first `/api/stats` request returns 1 and that static files and missing routes are counted.
