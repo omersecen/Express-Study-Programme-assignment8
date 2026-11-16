@@ -4,7 +4,7 @@ Web Programming, Assignment 8. A small Node.js and Express server for a fictiona
 
 ## Running the project
 
-Use Node.js 24 LTS.
+Use Node.js 26 LTS.
 
 ```sh
 npm ci
