@@ -47,3 +47,7 @@ The middleware is placed before `express.static` and the routes, so page request
 ## Route order
 
 The 404 fallback is an `app.use` handler after all the real routes. It catches any remaining request, including a request with the wrong HTTP method. There is no `app.get('*')` wildcard because that old syntax does not work in Express 5.
+
+## Browser page
+
+The page calls the API with relative URLs using `fetch()`. The subscribe button uses POST, and the response area shows the HTTP status and formatted JSON, including the expected 403 and 404 errors. Buttons are disabled while a request is pending; a network failure shows a message and enables them again.
